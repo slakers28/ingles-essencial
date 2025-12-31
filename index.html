@@ -108,6 +108,66 @@
     transform: scale(1.05); /* Pequeno efeito ao passar o mouse */
 }
 		
+/* --- ESTILOS DO JOGO DA MEMÓRIA --- */
+        .perspective {
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        /* Classe que será aplicada via JS para virar a carta */
+        .is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    padding: 10px; /* Aumentei um pouco o respiro interno */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    word-break: break-word; /* Faz a quebra de linha correta em frases grandes */
+    overflow: hidden; /* Garante que nada saia dos limites da borda */
+}
+
+        /* Frente da carta (O "interrogação") */
+        .card-front {
+            background-color: #1e3a8a; /* Azul escuro */
+            color: white;
+            font-size: 1.5rem;
+            border: 2px solid #3b82f6;
+        }
+
+        /* Verso da carta (O conteúdo escondido) */
+        .card-back {
+            background-color: white;
+            color: #1e3a8a;
+            transform: rotateY(180deg);
+            border: 2px solid #e5e7eb;
+            font-size: 0.85rem;
+            line-height: 1.2;
+        }
+
+        /* Quando o par é encontrado */
+        .matched .card-back {
+            background-color: #d1fae5 !important; /* Verde claro */
+            border-color: #10b981 !important;
+            color: #065f46 !important;
+        }
 
 </style>
 </head>
@@ -120,14 +180,27 @@
         <div class="flex items-center space-x-3">
             
             <button id="pomodoroBtnFixed" onclick="togglePomodoroUI()"
-                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded-md text-xs transition duration-150 shadow-sm">
-                Pomodoro
-            </button>
+    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1.5 px-3 rounded-md text-xs transition duration-150 shadow-sm flex items-center gap-1.5">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    
+    <span>Pomodoro</span>
+</button>
+			
+			
+			<button id="gameBtn" onclick="abrirMenuJogo()" 
+    class="hidden bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold py-1.5 px-3 rounded-md text-xs transition duration-150 shadow-sm flex items-center gap-1.5">
+    <span>🎮</span>
+    <span>Jogo</span>
+</button>
             
             <button id="backToCategoriesBtn" onclick="hideCategory()" 
-                class="hidden bg-gray-600 hover:bg-gray-700 text-white font-semibold py-1 px-2 rounded-md text-xs transition duration-150 shadow-sm">
-                <span class="mr-1">←</span> Categorias
-            </button>
+    class="hidden bg-gray-600 hover:bg-gray-700 text-white font-semibold py-1.5 px-3 rounded-md text-xs transition duration-150 shadow-sm flex items-center gap-1.5">
+    <span>←</span>
+    <span>Categorias</span>
+</button>
             
             <button id="scrollToTopBtn" onclick="scrollToTop()" 
                 class="hidden bg-gray-600 hover:bg-gray-700 text-white font-semibold py-1 px-2 rounded-full text-xs transition duration-150 shadow-sm">
@@ -3603,6 +3676,12 @@ if (!isAlphabet) {
                 document.getElementById('categoryDescription').textContent = data.description;
                 generateCards(data.words, categoryName);
 				document.getElementById('backToCategoriesBtn').classList.remove('hidden');
+				
+				// === ADICIONE ESTAS DUAS LINHAS ABAIXO ===
+                document.getElementById('gameBtn').classList.remove('hidden'); // Mostra o botão de jogo
+                window.currentCategory = categoryName; // Guarda a categoria para o jogo saber o que carregar
+				window.isSpecific = false; // Indica que é das categorias gramaticais
+                // ========================================
             }
         }
 
@@ -3616,6 +3695,12 @@ if (!isAlphabet) {
                 document.getElementById('categoryDescription').textContent = data.description;
                 generateCards(data.words, categoryName);
 				document.getElementById('backToCategoriesBtn').classList.remove('hidden');
+				
+				// === ADICIONE ESTAS DUAS LINHAS AQUI TAMBÉM ===
+        document.getElementById('gameBtn').classList.remove('hidden'); 
+        window.currentCategory = categoryName; 
+        window.isSpecific = true; // Avisa o jogo: "Procure no banco das 25 diversas"
+        // =============================================
             }
         }
         
@@ -3627,8 +3712,29 @@ if (!isAlphabet) {
             document.getElementById('categorySection').classList.add('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 			document.getElementById('backToCategoriesBtn').classList.add('hidden');
+			
+			// === ADICIONE ESTA LINHA ABAIXO ===
+    document.getElementById('gameBtn').classList.add('hidden'); 
+    // =================================
         }
 		
+function abrirMenuJogo() {
+    // 1. Mostra a Modal (janela preta)
+    document.getElementById('gameModal').classList.remove('hidden');
+    // 2. Garante que a tela de níveis apareça primeiro
+    document.getElementById('gameLevels').classList.remove('hidden');
+    // 3. Garante que o tabuleiro e a mensagem de vitória estejam escondidos
+    document.getElementById('gameBoard').classList.add('hidden');
+    document.getElementById('gameWinMessage').classList.add('hidden');
+    
+    // 4. Atualiza o título com o nome da categoria
+    document.getElementById('gameModalTitle').textContent = "Desafio: " + window.currentCategory;
+}
+
+function fecharJogo() {
+    document.getElementById('gameModal').classList.add('hidden');
+}
+
 
 // =================================================================
 // FUNÇÕES DE NAVEGAÇÃO E LISTENER DE SCROLL (PARA VOLTAR AO TOPO)
@@ -3674,8 +3780,188 @@ window.addEventListener('scroll', function() {
             fixedNavbar.classList.add('hidden');
         }
     }
+	
 });
 
+// ==========================================================
+// LÓGICA DO JOGO DA MEMÓRIA - SINCRONIZADA COM OS CARDS
+// ==========================================================
+
+let cartasViradas = [];
+let paresEncontrados = 0;
+let podeClicar = true;
+
+// 1. A mesma lógica de limpeza que você usa nos botões dos cards
+
+function prepararTextoParaAudio(texto) {
+    if (!texto) return "";
+    return texto
+        .replace(/<[^>]*>/g, '')      // Remove tags <strong> etc (igual ao seu card)
+        .replace(/[?'&]/g, '')        // Remove pontuação específica (igual ao seu card)
+        .replace(/\s/g, '_')          // Espaços por _ (igual ao seu card)
+        .toLowerCase();               // Tudo minúsculo
+}
+
+function abrirMenuJogo() {
+    document.getElementById('gameModal').classList.remove('hidden');
+    document.getElementById('gameLevels').classList.remove('hidden');
+    document.getElementById('gameBoard').classList.add('hidden');
+    document.getElementById('gameWinMessage').classList.add('hidden');
+    document.getElementById('gameModalTitle').textContent = "Desafio: " + window.currentCategory;
+}
+
+function fecharJogo() {
+    document.getElementById('gameModal').classList.add('hidden');
+    cartasViradas = [];
+}
+
+function iniciarJogo(nivel) {
+    const banco = window.isSpecific ? specificCategoryData : categoryData;
+    const listaPalavras = banco[window.currentCategory].words;
+    
+    window.totalParesJogo = (listaPalavras.length >= 30) ? 12 : 8;
+    const selecionadas = [...listaPalavras].sort(() => 0.5 - Math.random()).slice(0, window.totalParesJogo);
+    
+    // Configuração de cores Tom sobre Tom para a CAPA
+    let estiloCapa = "";
+    if (nivel === 1) {
+        estiloCapa = "bg-blue-50 border-blue-400 text-blue-600";
+    } else if (nivel === 2) {
+        estiloCapa = "bg-yellow-50 border-yellow-400 text-yellow-600";
+    } else {
+        estiloCapa = "bg-red-50 border-red-400 text-red-600";
+    }
+
+    let deck = [];
+    selecionadas.forEach((item, index) => {
+        const nomeArquivoPalavra = prepararTextoParaAudio(item.word);
+        const nomeArquivoFrase = prepararTextoParaAudio(item.example);
+        const audioFinal = (nivel === 3) ? `audio/${nomeArquivoFrase}.mp3` : `audio/${nomeArquivoPalavra}.mp3`;
+
+        let mostrarA = (nivel === 3) ? item.example : item.word;
+        deck.push({ id: index, audio: audioFinal, mostrar: mostrarA });
+        
+        let mostrarB = (nivel === 1) ? item.translation : (nivel === 2 ? item.word : item.example);
+        deck.push({ id: index, audio: audioFinal, mostrar: mostrarB });
+    });
+
+    deck.sort(() => 0.5 - Math.random());
+    const board = document.getElementById('gameBoard');
+    board.innerHTML = '';
+    board.classList.remove('hidden');
+    document.getElementById('gameLevels').classList.add('hidden');
+
+    deck.forEach((carta) => {
+        const cardDiv = document.createElement('div');
+        // Mantive sua estrutura de tamanho h-32 / h-40
+        cardDiv.className = "perspective h-32 sm:h-40 w-full mb-2 cursor-pointer";
+        cardDiv.innerHTML = `
+            <div class="card-inner w-full h-full" onclick="virarCarta(this, ${carta.id}, '${carta.audio}')">
+                
+                <div class="card-front ${estiloCapa} border-2 flex items-center justify-center rounded-lg shadow-sm text-3xl font-bold">
+                    ?
+                </div>
+                
+                <div class="card-back font-bold flex items-center justify-center p-2 bg-white border-2 border-blue-100 shadow-inner rounded-lg">
+                    <div class="text-center" style="font-size: ${carta.mostrar.length > 35 ? '0.75rem' : '0.85rem'}; line-height: 1.2; color: #1e3a8a;">
+                        ${carta.mostrar}
+                    </div>
+                </div>
+            </div>
+        `;
+        board.appendChild(cardDiv);
+    });
+    
+    paresEncontrados = 0;
+    cartasViradas = [];
+    podeClicar = true;
+}
+
+function virarCarta(elemento, id, audioPath) {
+    if (!podeClicar || elemento.classList.contains('is-flipped') || elemento.classList.contains('matched')) return;
+
+    if (audioPath) {
+        const audio = new Audio(audioPath);
+        audio.play().catch(error => console.error("Erro áudio:", audioPath));
+    }
+
+    elemento.classList.add('is-flipped');
+    cartasViradas.push({ id, elemento });
+
+    if (cartasViradas.length === 2) {
+        podeClicar = false;
+        // Aumentamos aqui para 2000 (2 segundos) para dar tempo de ler a segunda carta
+        setTimeout(verificarPar, 2000); 
+    }
+}
+
+function verificarPar() {
+    const [c1, c2] = cartasViradas;
+    if (c1.id === c2.id) {
+        c1.elemento.classList.add('matched');
+        c2.elemento.classList.add('matched');
+        paresEncontrados++;
+        if (paresEncontrados === window.totalParesJogo) {
+            setTimeout(() => {
+                document.getElementById('gameBoard').classList.add('hidden');
+                document.getElementById('gameWinMessage').classList.remove('hidden');
+            }, 500);
+        }
+    } else {
+        // Se errou, as cartas voltam a virar para baixo depois dos 2 segundos de espera lá de cima
+        c1.elemento.classList.remove('is-flipped');
+        c2.elemento.classList.remove('is-flipped');
+    }
+    cartasViradas = [];
+    podeClicar = true; // Só aqui o jogador pode clicar de novo
+}
+
+function voltarNiveis() {
+    document.getElementById('gameWinMessage').classList.add('hidden');
+    document.getElementById('gameLevels').classList.remove('hidden');
+}
+
     </script>
+	
+<div id="gameModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black bg-opacity-90 overflow-y-auto">
+    <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden relative">
+        
+        <div class="gradient-bg p-4 flex justify-between items-center text-white">
+            <h3 id="gameModalTitle" class="text-xl font-bold">Desafio de Memória</h3>
+            <button onclick="fecharJogo()" class="text-white hover:text-red-200 text-2xl font-bold">&times;</button>
+        </div>
+
+        <div id="gameLevels" class="p-8 text-center">
+            <p class="text-gray-600 mb-6">Escolha o nível de dificuldade para praticar:</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="iniciarJogo(1)" class="p-4 border-2 border-blue-500 rounded-xl hover:bg-blue-50 transition">
+                    <span class="block text-2xl mb-2">🥉</span>
+                    <span class="font-bold text-blue-900">Level 1</span>
+                    <span class="block text-xs text-gray-500">Inglês vs Português</span>
+                </button>
+                <button onclick="iniciarJogo(2)" class="p-4 border-2 border-yellow-500 rounded-xl hover:bg-yellow-50 transition">
+                    <span class="block text-2xl mb-2">🥈</span>
+                    <span class="font-bold text-blue-900">Level 2</span>
+                    <span class="block text-xs text-gray-500">Inglês vs Inglês</span>
+                </button>
+                <button onclick="iniciarJogo(3)" class="p-4 border-2 border-red-500 rounded-xl hover:bg-red-50 transition">
+                    <span class="block text-2xl mb-2">🥇</span>
+                    <span class="font-bold text-blue-900">Level 3</span>
+                    <span class="block text-xs text-gray-500">Frases vs Frases</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="gameBoard" class="hidden p-2 grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[75vh] overflow-y-auto bg-gray-50 rounded-lg">
+            </div>
+
+        <div id="gameWinMessage" class="hidden p-8 text-center">
+            <h2 class="text-3xl font-bold text-green-600 mb-4">Parabéns! 🎉</h2>
+            <p class="text-gray-700 mb-6">Você dominou esta categoria!</p>
+            <button onclick="voltarNiveis()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">Jogar Novamente</button>
+        </div>
+    </div>
+</div>	
+	
 </body>
 </html>
