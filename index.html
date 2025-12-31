@@ -3858,25 +3858,28 @@ function iniciarJogo(nivel) {
     document.getElementById('gameLevels').classList.add('hidden');
 
     deck.forEach((carta) => {
-        const cardDiv = document.createElement('div');
-        // Mantive sua estrutura de tamanho h-32 / h-40
-        cardDiv.className = "perspective h-32 sm:h-40 w-full mb-2 cursor-pointer";
-        cardDiv.innerHTML = `
-            <div class="card-inner w-full h-full" onclick="virarCarta(this, ${carta.id}, '${carta.audio}')">
-                
-                <div class="card-front ${estiloCapa} border-2 flex items-center justify-center rounded-lg shadow-sm text-3xl font-bold">
-                    ?
-                </div>
-                
-                <div class="card-back font-bold flex items-center justify-center p-2 bg-white border-2 border-blue-100 shadow-inner rounded-lg">
-                    <div class="text-center" style="font-size: ${carta.mostrar.length > 35 ? '0.75rem' : '0.85rem'}; line-height: 1.2; color: #1e3a8a;">
-                        ${carta.mostrar}
-                    </div>
+    const cardDiv = document.createElement('div');
+    cardDiv.className = "perspective h-32 sm:h-40 w-full mb-2 cursor-pointer";
+    cardDiv.innerHTML = `
+        <div class="card-inner w-full h-full" onclick="virarCarta(this, ${carta.id}, '${carta.audio}')">
+            
+            <div class="card-front ${estiloCapa} border-2 flex items-center justify-center rounded-lg shadow-sm text-2xl font-bold">
+                ?
+            </div>
+            
+            <div class="card-back flex items-center justify-center p-2 bg-white border-2 border-blue-100 shadow-inner rounded-lg">
+                <div class="text-center font-black uppercase tracking-tight" 
+                     style="color: #1e3a8a; 
+                            line-height: 1.1; 
+                            word-break: break-word;
+                            font-size: ${carta.mostrar.length > 30 ? '0.9rem' : (carta.mostrar.length > 15 ? '1.1rem' : '1.3rem')};">
+                    ${carta.mostrar}
                 </div>
             </div>
-        `;
-        board.appendChild(cardDiv);
-    });
+        </div>
+    `;
+    board.appendChild(cardDiv);
+});
     
     paresEncontrados = 0;
     cartasViradas = [];
