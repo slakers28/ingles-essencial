@@ -575,8 +575,8 @@ function playAudio(textToNormalize) {
     const audioPath = `audio/${normalizedName}.mp3`;
     
     const audio = new Audio(audioPath);
-    // VELOCIDADE BEM LENTA: 0.8
-    audio.playbackRate = 0.8; 
+    // VELOCIDADE BEM LENTA: 0.9
+    audio.playbackRate = 0.9; 
     
     audio.play().catch(error => {
         console.error("Erro ao tentar tocar o áudio de: " + textToNormalize, error);
@@ -598,7 +598,7 @@ function playAudio(textToNormalize) {
 
     // Técnica para garantir que a velocidade seja aplicada
     audio.onplay = () => {
-        audio.playbackRate = 0.8; // Teste com 0.8 para sentir a diferença real
+        audio.playbackRate = 0.9; // Teste com 0.9 para sentir a diferença real
     };
 
     audio.play().catch(error => {
@@ -3888,8 +3888,8 @@ function virarCarta(elemento, id, audioPath) {
 
     if (audioPath) {
         const audio = new Audio(audioPath);
-        // VELOCIDADE BEM LENTA: 0.8 (50% mais lento que o normal)
-        audio.playbackRate = 0.8; 
+        // VELOCIDADE BEM LENTA: 0.9 (50% mais lento que o normal)
+        audio.playbackRate = 0.9; 
         audio.play().catch(error => console.error("Erro áudio:", audioPath));
     }
 
